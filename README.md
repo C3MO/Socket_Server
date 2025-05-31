@@ -33,3 +33,7 @@ python sender.py peer1 document.pdf
 ## Development for the Client
 
 https://github.com/C3MO/Server_Client
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
