@@ -1,26 +1,29 @@
 import sys
-import socket
+import socket_utils
 
-args = sys.argv
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python receiver.py <output_file>")
+        sys.exit(1)
+        
+    output_file = sys.argv[1]
+    address = "dbl44.beuth-hochschule.de"
+    port = 44444
+    
+    try:
+        s = socket_utils.create_socket_connection(address, port)
+        data = socket_utils.receive_dslp_message(s)
+        
+        # Write received data to file
+        with open(output_file, 'wb') as f:
+            f.write(data)
+        print(f"Received data saved to {output_file}")
+        
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        if 's' in locals():
+            s.close()
 
-
-args = ['']
-args[0] = "retext.txt"
-
-adress = "dbl44.beuth-hochschule.de"
-port = 44444
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-try:
-    s.connect((adress, port))
-    print("Connect to server!")
-except:
-    print("Can't connect to server!")
-    s.close()
-    SystemExit()
-#receive message via dslp1.2
-data = s.recv(1024)
-print(bytes.decode(data))
-
-
-s.close()
-SystemExit()
+if __name__ == "__main__":
+    main()

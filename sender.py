@@ -1,51 +1,33 @@
 import sys
-import socket
 import base64
-import os
+import socket_utils
 
-args = sys.argv
-
-#args = ['', '']
-#args[0] = "141.64.174.92"
-#args[1] = "text.txt"
-
-def sendMessage(message, protocol):
-    '''Send Message with given protocol (str)'''
-    s.send(str.encode(protocol + "\r\n"))
-    s.send(str.encode("peer notify\r\n"))
-    s.send(str.encode(sys.argv[1] + "\r\n"))
-    s.send(str.encode(bytes.decode(message) + "\r\n"))
-    s.send(str.encode("dslp/end\r\n"))
-
-if len(args) < 3:
-    print("Please set two command line arguments!")
-else:
-
-    adress = "dbl44.beuth-hochschule.de"
+def main():
+    if len(sys.argv) < 3:
+        print("Usage: python sender.py <peer> <file_path>")
+        sys.exit(1)
+        
+    peer = sys.argv[1]
+    file_path = sys.argv[2]
+    address = "dbl44.beuth-hochschule.de"
     port = 44444
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
     try:
-        s.connect((adress, port))
-        print("Connect to server!")
-    except:
-        print("Can't connect to server!")
-        s.close()
-        SystemExit()
+        # Read and encode file
+        with open(file_path, 'rb') as f:
+            file_data = f.read()
+        encoded_data = base64.b64encode(file_data)
+        
+        # Connect and send
+        s = socket_utils.create_socket_connection(address, port)
+        socket_utils.send_dslp_message(s, "dslp/1.2", peer, encoded_data)
+        print(f"File {file_path} sent successfully to peer {peer}")
+        
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        if 's' in locals():
+            s.close()
 
-    file = args[2]
-    if os.path.exists(file):
-  
-        file = open(file, 'rb') 
-        file = file.read()
-        file_encode = base64.encodebytes(file)
-        print(file_encode)
-        
-        sendMessage(file_encode, "dslp/1.2")
-        print("Send file!")
-        
-        s.close()
-        SystemExit()
-    else:
-        print("Path does not exist!")
-s.close()
-SystemExit()
+if __name__ == "__main__":
+    main()
